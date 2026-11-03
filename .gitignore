@@ -1,0 +1,13 @@
+.idea/
+*.iml
+backend/target/
+frontend/node_modules/
+frontend/.next/
+frontend/next-env.d.ts
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+application-local.yml
+*.log
+/密码管理器.txt
