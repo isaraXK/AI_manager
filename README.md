@@ -43,3 +43,26 @@ npm.cmd run dev
 ```
 
 访问 http://127.0.0.1:3000 查看启动验证页。
+
+## 初始化应用主人账号
+
+在已设置 MySQL 连接变量的后端 PowerShell 中操作。应用主人账号用于网页登录，有自己的用户名和密码。先单独执行密码输入命令，输入至少 6 个字符。
+
+```powershell
+$ownerPassword = Read-Host '设置应用主人密码' -AsSecureString
+```
+
+输入完成后，再运行以下命令。使用普通配置启动时，Flyway 先准备数据表，随后首次初始化写入主人账号。已有账号时初始化会报错并退出。
+
+```powershell
+$env:AI_MANAGER_SETUP_USERNAME = 'owner'
+try {
+    $env:AI_MANAGER_SETUP_PASSWORD = [System.Net.NetworkCredential]::new('', $ownerPassword).Password
+    mvn spring-boot:run
+} finally {
+    Remove-Item Env:AI_MANAGER_SETUP_USERNAME,Env:AI_MANAGER_SETUP_PASSWORD -ErrorAction SilentlyContinue
+    Remove-Variable ownerPassword -ErrorAction SilentlyContinue
+}
+```
+
+初始化成功后停止应用，再以普通配置启动。当前账号功能通过 `/api/v1/auth/login`、`/api/v1/auth/session` 和 `/api/v1/auth/logout` 提供。登录与退出请求需带 `X-AI-Manager-Request: 1`，前端接入时使用同源请求。HTTPS 部署时设置 `AI_MANAGER_AUTH_SECURE_COOKIE=true`。
