@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("!smoke")
-class OwnerAuthService {
+public class OwnerAuthService {
+    public static final String SESSION_COOKIE = "ai_manager_session";
     static final Duration SESSION_DURATION = Duration.ofDays(7);
     private static final long OWNER_ID = 1L;
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -65,7 +66,7 @@ class OwnerAuthService {
                 profileReady(account.id())));
     }
 
-    Optional<Session> findSession(String token) {
+    public Optional<Session> findSession(String token) {
         return tokenHash(token).flatMap(hash -> jdbc.query("""
                 SELECT s.owner_id, p.owner_id IS NOT NULL AS profile_ready
                 FROM owner_session s LEFT JOIN owner_profile p ON p.owner_id = s.owner_id
@@ -107,6 +108,6 @@ class OwnerAuthService {
     }
 
     record Login(String token, boolean profileReady) {}
-    record Session(long ownerId, boolean profileReady) {}
+    public record Session(long ownerId, boolean profileReady) {}
     private record Account(long id, String username, String passwordHash) {}
 }

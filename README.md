@@ -2,6 +2,8 @@
 
 本仓库采用 Java 17、Spring Boot 3.5.16、MySQL 8.0 和 Next.js 16。项目配置与首条业务流程见 [技术设计](./首条流程技术设计.md)。
 
+已实现接口的请求、响应和版本记录见[后端接口索引](./docs/backend-api/README.md)。
+
 ## Windows 本机验证
 
 后端需要 Maven 3.6.3 或更高版本。本机已在 Maven Wrapper 缓存中验证 Maven 3.9.5 可使用 JDK 17 启动。可在普通 Windows PowerShell 中执行下方命令。其他机器可将已安装的 Maven 的 bin 目录加入 PATH。
@@ -33,16 +35,17 @@ mvn spring-boot:run
 
 业务表通过 backend/src/main/resources/db/migration 下的 Flyway 脚本维护。首次迁移随账号和日记模块提交。
 
-前端在另一个 PowerShell 中从项目根目录执行以下命令。首次 npm install 会生成锁文件，之后可用 npm ci 重现安装。
+前端在另一个 PowerShell 中从项目根目录执行以下命令。已有锁文件可用 npm ci 安装依赖。验证网页登录时，后端需使用普通配置连接 MySQL。下面以 8083 为例，按后端实际端口设置地址。
 
 ```powershell
 Set-Location frontend
-npm.cmd install
+$env:AI_MANAGER_BACKEND_URL = 'http://127.0.0.1:8083'
+npm.cmd ci
 npm.cmd run build
 npm.cmd run dev
 ```
 
-访问 http://127.0.0.1:3000 查看启动验证页。
+访问 http://127.0.0.1:3000，用应用主人账号登录。页面流程和错误处理见[网页登录与个人资料接入](./docs/frontend-integration/account-profile.md)。
 
 ## 初始化应用主人账号
 

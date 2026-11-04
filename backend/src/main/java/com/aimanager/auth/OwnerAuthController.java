@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.aimanager.auth.OwnerAuthService.SESSION_COOKIE;
+
 @RestController
 @Profile("!smoke")
 @RequestMapping("/api/v1/auth")
 class OwnerAuthController {
-    private static final String COOKIE = "ai_manager_session";
     private final OwnerAuthService auth;
     private final boolean secureCookie;
 
@@ -45,7 +46,7 @@ class OwnerAuthController {
     }
 
     @GetMapping("/session")
-    ResponseEntity<SessionStatus> session(@CookieValue(value = COOKIE, required = false) String token) {
+    ResponseEntity<SessionStatus> session(@CookieValue(value = SESSION_COOKIE, required = false) String token) {
         SessionStatus status = auth.findSession(token)
                 .map(session -> new SessionStatus(true, session.profileReady()))
                 .orElse(new SessionStatus(false, false));
@@ -54,7 +55,7 @@ class OwnerAuthController {
 
     @PostMapping("/logout")
     ResponseEntity<?> logout(@RequestHeader(value = "X-AI-Manager-Request", required = false) String requestMarker,
-            @CookieValue(value = COOKIE, required = false) String token) {
+            @CookieValue(value = SESSION_COOKIE, required = false) String token) {
         if (!"1".equals(requestMarker)) {
             return error(403, "REQUEST_MARKER_REQUIRED", "请求缺少同源校验标记");
         }
@@ -63,7 +64,7 @@ class OwnerAuthController {
     }
 
     private String cookie(String token, Duration age) {
-        return ResponseCookie.from(COOKIE, token).httpOnly(true).secure(secureCookie)
+        return ResponseCookie.from(SESSION_COOKIE, token).httpOnly(true).secure(secureCookie)
                 .sameSite("Lax").path("/").maxAge(age).build().toString();
     }
 
